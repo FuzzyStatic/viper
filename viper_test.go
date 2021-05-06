@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/spf13/viper/internal/testutil"
+	"github.com/FuzzyStatic/viper/internal/testutil"
 )
 
 var yamlExample = []byte(`Hacker: true
@@ -1688,6 +1688,23 @@ func TestSafeWriteConfigAsWithExistingFile(t *testing.T) {
 	require.Error(t, err)
 	_, ok := err.(ConfigFileAlreadyExistsError)
 	assert.True(t, ok, "Expected ConfigFileAlreadyExistsError")
+}
+
+func TestWriteHiddenFile(t *testing.T) {
+	v := New()
+	fs := afero.NewMemMapFs()
+	fs.Create("/test/.config")
+	v.SetFs(fs)
+
+	v.SetConfigName(".config")
+	v.SetConfigType("yaml")
+	v.AddConfigPath("/test")
+
+	err := v.ReadInConfig()
+	require.NoError(t, err)
+
+	err = v.WriteConfig()
+	require.NoError(t, err)
 }
 
 var yamlMergeExampleTgt = []byte(`
